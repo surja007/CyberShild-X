@@ -1,0 +1,33 @@
+*.iml
+.gradle
+/local.properties
+/.idea/
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# Backend
+backend/nodejs/node_modules/
+backend/nodejs/.env
+backend/fastapi/__pycache__/
+backend/fastapi/*.pkl
+backend/fastapi/venv/
+backend/fastapi/.env
+
+# Android
+*.apk
+*.ap_
+*.aab
+*.dex
+*.class
+bin/
+gen/
+out/
+.gradle/
+build/
+local.properties
+proguard/
+*.log

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">CyberShield-X</string>
+    <string name="accessibility_service_description">CyberShield-X App Locker monitors which apps are opened and requires authentication for locked apps. This service does not collect or share any personal data.</string>
+</resources>
