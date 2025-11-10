@@ -1,5 +1,6 @@
 package com.cybershield.x.ui.lockscreen
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -37,6 +38,8 @@ class LockScreenActivity : FragmentActivity() {
                         onUnlock = {
                             packageName?.let { pkg ->
                                 AppLockService.getInstance()?.unlockApp(pkg)
+                                // Launch the unlocked app
+                                launchApp(pkg)
                             }
                             finish()
                         },
@@ -57,6 +60,19 @@ class LockScreenActivity : FragmentActivity() {
         showBiometricPrompt()
     }
     
+    private fun launchApp(packageName: String) {
+        try {
+            val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
+            if (launchIntent != null) {
+                launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                launchIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                startActivity(launchIntent)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+    
     private fun showBiometricPrompt() {
         val executor = ContextCompat.getMainExecutor(this)
         
@@ -68,6 +84,8 @@ class LockScreenActivity : FragmentActivity() {
                     super.onAuthenticationSucceeded(result)
                     packageName?.let { pkg ->
                         AppLockService.getInstance()?.unlockApp(pkg)
+                        // Launch the unlocked app
+                        launchApp(pkg)
                     }
                     finish()
                 }

@@ -31,6 +31,11 @@ fun LockerScreen(navController: NavController) {
     val allApps by database.appDao().getAllApps().collectAsState(initial = emptyList())
     val lockedApps by database.lockedAppDao().getLockedApps().collectAsState(initial = emptyList())
     
+    // Filter to show only user-installed apps (non-system apps)
+    val userApps = remember(allApps) {
+        allApps.filter { !it.isSystemApp }
+    }
+    
     var showAppSelector by remember { mutableStateOf(false) }
     var isServiceEnabled by remember { mutableStateOf(false) }
     
@@ -115,11 +120,40 @@ fun LockerScreen(navController: NavController) {
                                 text = "${lockedApps.size} apps protected",
                                 style = MaterialTheme.typography.bodyMedium
                             )
+                            Text(
+                                text = "${userApps.size} user apps available",
+                                style = MaterialTheme.typography.bodySmall
+                            )
                         }
                         Icon(
                             imageVector = Icons.Default.Lock,
                             contentDescription = null,
                             modifier = Modifier.size(48.dp)
+                        )
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer
+                    )
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            text = "🔒 Auto-Relock Enabled",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Apps automatically re-lock when you leave them",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                        Text(
+                            text = "Temporary unlock: 2 minutes",
+                            style = MaterialTheme.typography.bodySmall
                         )
                     }
                 }
@@ -142,7 +176,7 @@ fun LockerScreen(navController: NavController) {
                                 style = MaterialTheme.typography.titleMedium
                             )
                             Text(
-                                text = "Tap + to add apps to protect",
+                                text = "Tap + to add user apps to protect",
                                 style = MaterialTheme.typography.bodySmall
                             )
                         }
@@ -192,7 +226,7 @@ fun LockerScreen(navController: NavController) {
     
     if (showAppSelector) {
         AppSelectorDialog(
-            apps = allApps.filter { app ->
+            apps = userApps.filter { app ->
                 !lockedApps.any { it.packageName == app.packageName }
             },
             onDismiss = { showAppSelector = false },
@@ -220,19 +254,55 @@ fun AppSelectorDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Select App to Lock") },
+        title = { 
+            Column {
+                Text("Select App to Lock")
+                Text(
+                    text = "${apps.size} user apps",
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+        },
         text = {
-            LazyColumn {
-                items(apps.size) { index ->
-                    val app = apps[index]
-                    TextButton(
-                        onClick = { onAppSelected(app) },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            text = app.appName,
-                            modifier = Modifier.fillMaxWidth()
-                        )
+            if (apps.isEmpty()) {
+                Text(
+                    text = "No user apps available to lock.\nAll apps are either already locked or system apps.",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            } else {
+                LazyColumn {
+                    items(apps.size) { index ->
+                        val app = apps[index]
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp),
+                            onClick = { onAppSelected(app) }
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Lock,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Column {
+                                    Text(
+                                        text = app.appName,
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                    Text(
+                                        text = app.packageName,
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }
