@@ -76,7 +76,7 @@ No internet connection or backend server required!
 
 **Biometric not working**
 - Enable fingerprint/face unlock in device settings
-- Test on real device (not emulator)
+- Test on real device
 
 **No apps showing**
 - Grant "Query all packages" permission
